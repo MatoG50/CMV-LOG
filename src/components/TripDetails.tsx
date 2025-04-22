@@ -1,13 +1,13 @@
 import { useState } from "react";
+interface TripDetailsProps {
+  setTripId: React.Dispatch<React.SetStateAction<number | null>>;
+}
 
-const TripDetails = () => {
+const TripDetails: React.FC<TripDetailsProps> = ({ setTripId }) => {
   const [currentLocation, setCurrentLocation] = useState("");
   const [pickupLocation, setPickupLocation] = useState("");
   const [dropoffLocation, setDropoffLocation] = useState("");
   const [currentCycle, setCurrentCycle] = useState("");
-
-  // const handleSubmit = async e => {
-  //   e.preventDefault();
 
   const data = {
     current_location: currentLocation,
@@ -16,9 +16,27 @@ const TripDetails = () => {
     current_cycle_hours: parseFloat(currentCycle),
   };
 
-  const handleSubmit = (e: { preventDefault: () => void }) => {
-    console.log(data);
+  const handleSubmit = async (e: { preventDefault: () => void }) => {
     e.preventDefault();
+
+    const response = await fetch("http://127.0.0.1:8000/trips/", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify(data),
+    });
+    console.log("API response:", response);
+
+    if (response.ok) {
+      const result = await response.json();
+      const newTripId = result.trip.id;
+      setTripId(newTripId);
+      console.log("Trip created successfully:", result);
+    } else {
+      console.error("Failed to create trip");
+    }
+
     setCurrentLocation("");
     setPickupLocation("");
     setDropoffLocation("");
