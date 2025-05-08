@@ -13,13 +13,19 @@ const RouteMap = ({ tripId }: { tripId: number }) => {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
+    // if (!tripId || typeof tripId !== "number") {
+    //   console.error("Invalid or missing tripId:", tripId);
+    //   return;
+    // }
+
     const fetchRoute = async () => {
       try {
         const res = await fetch(`http://127.0.0.1:8000/trips/${tripId}/route`);
         const data = await res.json();
+        console.log("Route data:", data);
 
-        if (data && data.features && data.features[0].geometry) {
-          const routeGeometry = data.features[0].geometry.coordinates;
+        if (data?.route?.features?.[0]?.geometry?.coordinates) {
+          const routeGeometry = data.route.features[0].geometry.coordinates;
 
           const formattedCoords = routeGeometry.map(([lng, lat]: number[]) => [
             lat,

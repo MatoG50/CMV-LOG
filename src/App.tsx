@@ -1,11 +1,11 @@
 import { useState } from "react";
-import Eld from "./components/Eld";
 import NavBar from "./components/NavBar";
 import RouteMap from "./components/RouteMap";
 import TripDetails from "./components/TripDetails";
+import ELDLogGraph from "./components/ELDLogGraph";
 
 function App() {
-  const [tripId, setTripId] = useState<number | null>(null);
+  const [tripId, setTripId] = useState<number | null>(50);
   return (
     <>
       <div className="bg-[#F6F7F8] h-screen pr-5 pl-5 flex flex-col ">
@@ -14,7 +14,7 @@ function App() {
           <TripDetails setTripId={setTripId} />
           {tripId && <RouteMap tripId={tripId} />}
         </div>
-        <Eld />
+        {tripId && <ELDLogGraph tripId={tripId} />}
       </div>
     </>
   );
