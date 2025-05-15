@@ -5,7 +5,7 @@ import TripDetails from "./components/TripDetails";
 import ELDLogGraph from "./components/ELDLogGraph";
 
 function App() {
-  const [tripId, setTripId] = useState<number | null>(null);
+  const [tripId, setTripId] = useState<number | null>(51);
   console.log("Trip ID in App component:", tripId);
 
   return (
