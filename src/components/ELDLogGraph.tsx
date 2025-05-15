@@ -36,8 +36,9 @@ const statusColors = {
 
 const ELDStatusGraph = ({ sheet }: { sheet: LogSheet }) => {
   const canvasRef = useRef<HTMLCanvasElement | null>(null);
+  const [hoverInfo, setHoverInfo] = useState<string | null>(null);
 
-  const parseTimeToHours = (timeStr: string, baseDate: string) => {
+  const parseTimeToHours = (timeStr: string) => {
     if (timeStr.includes("day")) {
       const [dayPart, timePart] = timeStr.split(", ");
       const days = parseInt(dayPart) || 0;
@@ -72,9 +73,9 @@ const ELDStatusGraph = ({ sheet }: { sheet: LogSheet }) => {
       statusLevels[status.id] = margin.top + graphHeight * status.yPos;
     });
 
-    // Calculate day’s time window
-    const dayStartHours = parseTimeToHours(sheet.start_time, sheet.date);
-    const dayEndHours = parseTimeToHours(sheet.end_time, sheet.date);
+    // Calculate day's time window
+    const dayStartHours = parseTimeToHours(sheet.start_time);
+    const dayEndHours = parseTimeToHours(sheet.end_time);
     const dayDuration = Math.min(dayEndHours - dayStartHours, 24); // Cap at 24 hours for display
 
     ctx.clearRect(0, 0, canvas.width, canvas.height);
@@ -123,7 +124,7 @@ const ELDStatusGraph = ({ sheet }: { sheet: LogSheet }) => {
     ctx.beginPath();
 
     sheet.entries.forEach((point, i) => {
-      const totalHours = parseTimeToHours(point.time, sheet.date);
+      const totalHours = parseTimeToHours(point.time);
       const relativeHours = totalHours - dayStartHours;
       if (relativeHours < 0 || relativeHours > dayDuration) return; // Skip out-of-bounds events
       const x = margin.left + (relativeHours / dayDuration) * graphWidth;
@@ -133,7 +134,7 @@ const ELDStatusGraph = ({ sheet }: { sheet: LogSheet }) => {
         ctx.moveTo(x, y);
       } else {
         const prev = sheet.entries[i - 1];
-        const prevTotalHours = parseTimeToHours(prev.time, sheet.date);
+        const prevTotalHours = parseTimeToHours(prev.time);
         const prevRelativeHours = prevTotalHours - dayStartHours;
         if (prevRelativeHours < 0 || prevRelativeHours > dayDuration) return;
         const prevX =
@@ -152,7 +153,7 @@ const ELDStatusGraph = ({ sheet }: { sheet: LogSheet }) => {
 
     // Final segment
     const last = sheet.entries[sheet.entries.length - 1];
-    const lastTotalHours = parseTimeToHours(last.time, sheet.date);
+    const lastTotalHours = parseTimeToHours(last.time);
     const lastRelativeHours = lastTotalHours - dayStartHours;
     if (lastRelativeHours <= dayDuration) {
       const lastX =
@@ -166,39 +167,37 @@ const ELDStatusGraph = ({ sheet }: { sheet: LogSheet }) => {
       ctx.stroke();
     }
 
-    // Add tooltips (simplified hover effect)
+    // Draw points
     canvas.onmousemove = e => {
       const rect = canvas.getBoundingClientRect();
       const mouseX = e.clientX - rect.left;
       const mouseY = e.clientY - rect.top;
 
-      ctx.clearRect(0, 0, margin.left - 10, canvas.height); // Clear tooltip area
+      let hoverText = null;
       sheet.entries.forEach(point => {
-        const totalHours = parseTimeToHours(point.time, sheet.date);
+        const totalHours = parseTimeToHours(point.time);
         const relativeHours = totalHours - dayStartHours;
         if (relativeHours < 0 || relativeHours > dayDuration) return;
         const x = margin.left + (relativeHours / dayDuration) * graphWidth;
         const y = statusLevels[point.status];
 
         if (Math.abs(mouseX - x) < 10 && Math.abs(mouseY - y) < 10) {
-          ctx.font = "12px Arial";
-          ctx.fillStyle = "#333";
-          ctx.textAlign = "left";
-          ctx.fillText(
-            `${point.activity || point.status} (${point.location || "N/A"})`,
-            margin.left - 160,
-            margin.top + 20
-          );
+          hoverText = `${point.time} - ${point.activity || point.status} (${
+            point.location || "N/A"
+          })`;
         }
       });
+      setHoverInfo(hoverText);
     };
+
+    canvas.onmouseout = () => setHoverInfo(null);
   }, [sheet]);
 
   return (
-    <div style={{ width: "100%", overflowX: "auto" }}>
+    <div style={{ position: "relative", width: "100%", overflowX: "auto" }}>
       <canvas
         ref={canvasRef}
-        width={window.innerWidth}
+        width={window.innerWidth * 0.9}
         height={300}
         style={{
           display: "block",
@@ -207,6 +206,22 @@ const ELDStatusGraph = ({ sheet }: { sheet: LogSheet }) => {
           backgroundColor: "#fff",
         }}
       />
+      {hoverInfo && (
+        <div
+          style={{
+            position: "absolute",
+            top: "10px",
+            left: "180px",
+            backgroundColor: "rgba(255, 255, 255, 0.9)",
+            padding: "5px 10px",
+            border: "1px solid #ddd",
+            borderRadius: "4px",
+            fontSize: "14px",
+          }}
+        >
+          {hoverInfo}
+        </div>
+      )}
     </div>
   );
 };
@@ -214,9 +229,11 @@ const ELDStatusGraph = ({ sheet }: { sheet: LogSheet }) => {
 const ELDLogGraph = ({ tripId }: { tripId: number }) => {
   const [logSheets, setLogSheets] = useState<LogSheet[]>([]);
   const [currentSheetIndex, setCurrentSheetIndex] = useState(0);
+  const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    if (tripId === null) return; // Early exit if tripId is null
+    if (tripId === null) return;
+    setLoading(true);
     console.log("Fetching ELD logs for tripId:", tripId);
 
     const fetchData = async () => {
@@ -230,7 +247,6 @@ const ELDLogGraph = ({ tripId }: { tripId: number }) => {
           Array.isArray(res.data.log_sheets) &&
           res.data.log_sheets.length > 0
         ) {
-          console.log("Setting logSheets state:", res.data.log_sheets);
           setLogSheets(res.data.log_sheets);
           setCurrentSheetIndex(0);
         } else {
@@ -238,24 +254,41 @@ const ELDLogGraph = ({ tripId }: { tripId: number }) => {
         }
       } catch (error) {
         console.error("Error fetching ELD logs:", error);
+      } finally {
+        setLoading(false);
       }
     };
 
     fetchData();
   }, [tripId]);
 
-  if (!tripId || logSheets.length === 0) return <div>Loading...</div>;
+  if (loading) return <div>Loading...</div>;
+  if (!logSheets.length) return <div>No log data available</div>;
 
   return (
     <div>
-      <div style={{ display: "flex", gap: "10px", marginBottom: "10px" }}>
+      <div
+        style={{
+          display: "flex",
+          gap: "10px",
+          marginBottom: "10px",
+          overflowX: "auto",
+          padding: "10px 0",
+        }}
+      >
         {logSheets.map((sheet, index) => (
           <button
             key={sheet.day}
             onClick={() => setCurrentSheetIndex(index)}
             style={{
               fontWeight: currentSheetIndex === index ? "bold" : "normal",
-              padding: "5px 10px",
+              padding: "5px 15px",
+              whiteSpace: "nowrap",
+              backgroundColor:
+                currentSheetIndex === index ? "#e2e2e2" : "#f5f5f5",
+              border: "1px solid #ddd",
+              borderRadius: "4px",
+              cursor: "pointer",
             }}
           >
             Day {sheet.day} ({sheet.date})

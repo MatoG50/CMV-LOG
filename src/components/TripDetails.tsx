@@ -49,7 +49,7 @@ const TripDetails: React.FC<TripDetailsProps> = ({ setTripId }) => {
       <div className="mr-6 ml-6 mt-10">
         <p className="font-bold text-[24px]">Trip Details</p>
         <form className="w-full mt-8 " onSubmit={handleSubmit}>
-          <div className="mb-[3%]">
+          <div className="mb-[2%]">
             <label className="block text-base font-bold mb-[1%] font-body">
               Current location:
             </label>
@@ -62,7 +62,7 @@ const TripDetails: React.FC<TripDetailsProps> = ({ setTripId }) => {
             />
           </div>
 
-          <div className="mb-[3%]">
+          <div className="mb-[2%]">
             <label className="block text-base font-bold mb-[1%] font-body">
               Pickup location:
             </label>
@@ -75,7 +75,7 @@ const TripDetails: React.FC<TripDetailsProps> = ({ setTripId }) => {
             />
           </div>
 
-          <div className="mb-[3%]">
+          <div className="mb-[2%]">
             <label className="block text-base font-bold mb-[1%] font-body">
               Dropoff location:
             </label>
@@ -87,7 +87,7 @@ const TripDetails: React.FC<TripDetailsProps> = ({ setTripId }) => {
               style={{ backgroundColor: "transparent" }}
             />
           </div>
-          <div className="mb-[3%]">
+          <div className="mb-[2%]">
             <label className="block text-base font-bold mb-[1%] font-body">
               Current cycle User (Hrs):
             </label>

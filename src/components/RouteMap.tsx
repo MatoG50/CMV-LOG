@@ -5,7 +5,7 @@ import {
   Marker,
   Popup,
 } from "react-leaflet";
-import { LatLngExpression } from "leaflet";
+import { LatLngExpression, LatLngTuple } from "leaflet";
 import { useEffect, useState } from "react";
 import L from "leaflet";
 
@@ -88,10 +88,13 @@ const RouteMap = ({ tripId }: { tripId: number }) => {
           const feature = data.route.features[0];
           const routeGeometry = feature.geometry.coordinates;
 
-          const formattedCoords = routeGeometry.map(([lng, lat]) => [lat, lng]);
+          const formattedCoords: LatLngTuple[] = routeGeometry.map(
+            ([lng, lat]) => [lat, lng] as LatLngTuple
+          );
+
           setRouteCoords(formattedCoords);
 
-          // Get location names from backend if available
+          // Process start and end points
           if (feature.properties?.summary) {
             if (feature.properties.summary.start_point) {
               setStartName(feature.properties.summary.start_point);
@@ -158,12 +161,12 @@ const RouteMap = ({ tripId }: { tripId: number }) => {
     };
 
     fetchRoute();
-  }, [tripId]);
+  }, [tripId, startName, endName]);
 
   if (loading) return <p className="justify-start">Loading map...</p>;
 
   return (
-    <div className="bg-white w-full h-[500px] rounded-lg overflow-hidden relative">
+    <div className="bg-white w-[72%] rounded-lg  overflow-hidden relative">
       <MapContainer
         center={routeCoords[0] || [0, 0]}
         zoom={routeCoords.length ? 6 : 2}
