@@ -8,6 +8,24 @@ import {
 import { LatLngExpression, LatLngTuple } from "leaflet";
 import { useEffect, useState } from "react";
 import L from "leaflet";
+import staticmap from "../assets/map.avif";
+
+const RoutePlaceholder = () => (
+  <div
+    className="bg-white w-[72%] rounded-lg overflow-hidden relative flex flex-col items-center justify-center"
+    style={{ height: "500px" }}
+  >
+    <img
+      src={staticmap}
+      alt="No trip selected"
+      className="w-3/4 max-w-md mb-4"
+    />
+    <p className="text-gray-600 font-medium text-lg">No Trip Submitted</p>
+    <p className="text-gray-400 text-base mt-1">
+      Please submit a trip to view the route map
+    </p>
+  </div>
+);
 
 interface LogEntry {
   time: string;
@@ -68,7 +86,7 @@ const restIcon = new L.Icon({
   iconAnchor: [12, 12],
 });
 
-const RouteMap = ({ tripId }: { tripId: number }) => {
+const RouteMap = ({ tripId }: { tripId: number | null }) => {
   const [routeCoords, setRouteCoords] = useState<LatLngExpression[]>([]);
   const [stops, setStops] = useState<
     { position: LatLngExpression; activity: string }[]
@@ -163,7 +181,20 @@ const RouteMap = ({ tripId }: { tripId: number }) => {
     fetchRoute();
   }, [tripId, startName, endName]);
 
-  if (loading) return <p className="justify-start">Loading map...</p>;
+  // placeholder
+  if (tripId === null) {
+    return <RoutePlaceholder />;
+  }
+
+  if (loading)
+    return (
+      <div
+        className="bg-white w-[72%] rounded-lg overflow-hidden relative flex items-center justify-center"
+        style={{ height: "500px" }}
+      >
+        <p className="text-gray-500">Loading map...</p>
+      </div>
+    );
 
   return (
     <div className="bg-white w-[72%] rounded-lg  overflow-hidden relative">

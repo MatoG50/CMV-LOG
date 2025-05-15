@@ -5,7 +5,7 @@ import TripDetails from "./components/TripDetails";
 import ELDLogGraph from "./components/ELDLogGraph";
 
 function App() {
-  const [tripId, setTripId] = useState<number | null>(51);
+  const [tripId, setTripId] = useState<number | null>(null);
   console.log("Trip ID in App component:", tripId);
 
   return (
@@ -14,7 +14,7 @@ function App() {
         <NavBar />
         <div className="flex justify-between overflow-hidden mt-[1%] h-[50%]">
           <TripDetails setTripId={setTripId} />
-          {tripId && <RouteMap tripId={tripId} />}
+          {<RouteMap tripId={tripId} />}
         </div>
 
         {tripId && <ELDLogGraph tripId={tripId} />}
