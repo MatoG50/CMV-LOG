@@ -216,24 +216,35 @@ const ELDLogGraph = ({ tripId }: { tripId: number }) => {
   const [currentSheetIndex, setCurrentSheetIndex] = useState(0);
 
   useEffect(() => {
+    if (tripId === null) return; // Early exit if tripId is null
+    console.log("Fetching ELD logs for tripId:", tripId);
+
     const fetchData = async () => {
       try {
         const res = await axios.get<TripData>(
-          `http://127.0.0.1:8000/trips/${tripId}/logs/`
+          `http://127.0.0.1:8000/trips/${tripId}/route`
         );
-        if (Array.isArray(res.data.log_sheets)) {
+        console.log("Full API Response:", res.data);
+
+        if (
+          Array.isArray(res.data.log_sheets) &&
+          res.data.log_sheets.length > 0
+        ) {
+          console.log("Setting logSheets state:", res.data.log_sheets);
           setLogSheets(res.data.log_sheets);
+          setCurrentSheetIndex(0);
         } else {
-          console.error("Expected 'log_sheets' array in response");
+          console.warn("No log sheets found for tripId:", tripId);
         }
       } catch (error) {
         console.error("Error fetching ELD logs:", error);
       }
     };
+
     fetchData();
   }, [tripId]);
 
-  if (logSheets.length === 0) return <div>Loading...</div>;
+  if (!tripId || logSheets.length === 0) return <div>Loading...</div>;
 
   return (
     <div>

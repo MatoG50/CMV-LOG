@@ -30,6 +30,7 @@ const TripDetails: React.FC<TripDetailsProps> = ({ setTripId }) => {
 
     if (response.ok) {
       const result = await response.json();
+      console.log("Full API response:", result);
       const newTripId = result.trip.id;
       setTripId(newTripId);
       console.log("Trip created successfully:", result);
