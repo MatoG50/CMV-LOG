@@ -74,10 +74,10 @@ const ELDStatusGraph = ({ sheet }: { sheet: LogSheet }) => {
       statusLevels[status.id] = margin.top + graphHeight * status.yPos;
     });
 
-    // Calculate day's time window
+    // day's time window
     const dayStartHours = parseTimeToHours(sheet.start_time);
     const dayEndHours = parseTimeToHours(sheet.end_time);
-    const dayDuration = Math.min(dayEndHours - dayStartHours, 24); // Cap at 24 hours for display
+    const dayDuration = Math.min(dayEndHours - dayStartHours, 24);
 
     ctx.clearRect(0, 0, canvas.width, canvas.height);
 
@@ -120,14 +120,14 @@ const ELDStatusGraph = ({ sheet }: { sheet: LogSheet }) => {
       ctx.fillText(status.label, margin.left - 10, statusLevels[status.id] + 5);
     });
 
-    // Draw timeline
+    // timeline
     ctx.lineWidth = 3;
     ctx.beginPath();
 
     sheet.entries.forEach((point, i) => {
       const totalHours = parseTimeToHours(point.time);
       const relativeHours = totalHours - dayStartHours;
-      if (relativeHours < 0 || relativeHours > dayDuration) return; // Skip out-of-bounds events
+      if (relativeHours < 0 || relativeHours > dayDuration) return;
       const x = margin.left + (relativeHours / dayDuration) * graphWidth;
       const y = statusLevels[point.status];
 
@@ -142,7 +142,7 @@ const ELDStatusGraph = ({ sheet }: { sheet: LogSheet }) => {
           margin.left + (prevRelativeHours / dayDuration) * graphWidth;
         const prevY = statusLevels[prev.status];
 
-        // Fill status block
+        // status block
         ctx.fillStyle = statusColors[prev.status] || "#ccc";
         ctx.fillRect(prevX, prevY - 5, x - prevX, 10);
 
@@ -152,7 +152,6 @@ const ELDStatusGraph = ({ sheet }: { sheet: LogSheet }) => {
       }
     });
 
-    // Final segment
     const last = sheet.entries[sheet.entries.length - 1];
     const lastTotalHours = parseTimeToHours(last.time);
     const lastRelativeHours = lastTotalHours - dayStartHours;

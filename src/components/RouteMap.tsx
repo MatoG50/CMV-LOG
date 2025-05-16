@@ -126,7 +126,7 @@ const RouteMap = ({ tripId }: { tripId: number | null }) => {
           const stopPoints: { position: LatLngExpression; activity: string }[] =
             [];
 
-          // Add start and end points
+          // start and end points
           if (formattedCoords.length > 0) {
             stopPoints.push({
               position: formattedCoords[0],
@@ -139,7 +139,7 @@ const RouteMap = ({ tripId }: { tripId: number | null }) => {
             });
           }
 
-          // Process log entries for other stops
+          // log entries for other stops
           data.log_sheets.forEach(sheet => {
             sheet.entries.forEach(entry => {
               if (
