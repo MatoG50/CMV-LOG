@@ -17,7 +17,7 @@ function App() {
           {<RouteMap tripId={tripId} />}
         </div>
 
-        {tripId && <ELDLogGraph tripId={tripId} />}
+        {<ELDLogGraph tripId={tripId} />}
       </div>
     </>
   );

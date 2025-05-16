@@ -1,5 +1,6 @@
 import { useEffect, useRef, useState } from "react";
 import axios from "axios";
+import { FaTruck } from "react-icons/fa";
 
 interface StatusPoint {
   time: string;
@@ -226,7 +227,7 @@ const ELDStatusGraph = ({ sheet }: { sheet: LogSheet }) => {
   );
 };
 
-const ELDLogGraph = ({ tripId }: { tripId: number }) => {
+const ELDLogGraph = ({ tripId }: { tripId: number | null }) => {
   const [logSheets, setLogSheets] = useState<LogSheet[]>([]);
   const [currentSheetIndex, setCurrentSheetIndex] = useState(0);
   const [loading, setLoading] = useState(true);
@@ -261,6 +262,41 @@ const ELDLogGraph = ({ tripId }: { tripId: number }) => {
 
     fetchData();
   }, [tripId]);
+  if (tripId === null) {
+    return (
+      <div
+        style={{
+          width: "100%",
+          overflowX: "auto",
+        }}
+      >
+        <div
+          style={{
+            display: "flex",
+            flexDirection: "column",
+            alignItems: "center",
+            justifyContent: "center",
+            height: "300px",
+            width: `${window.innerWidth * 0.9}px`,
+            margin: "20px auto",
+            backgroundColor: "#f5f5f5",
+            borderRadius: "8px",
+            border: "1px dashed #ccc",
+            padding: "20px",
+            textAlign: "center",
+          }}
+        >
+          <FaTruck size={60} color="#e0e0e0" style={{ marginBottom: "15px" }} />
+          <div style={{ fontSize: "18px", marginBottom: "10px" }}>
+            No Trip Submitted
+          </div>
+          <div style={{ color: "#666", maxWidth: "80%" }}>
+            Please submit a trip to view the ELD log data
+          </div>
+        </div>
+      </div>
+    );
+  }
 
   if (loading) return <div>Loading...</div>;
   if (!logSheets.length) return <div>No log data available</div>;
