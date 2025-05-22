@@ -239,7 +239,7 @@ const ELDLogGraph = ({ tripId }: { tripId: number | null }) => {
     const fetchData = async () => {
       try {
         const res = await axios.get<TripData>(
-          `http://127.0.0.1:8000/trips/${tripId}/route`
+          `${import.meta.env.VITE_APP_URL}/trips/${tripId}/route`
         );
         console.log("Full API Response:", res.data);
 

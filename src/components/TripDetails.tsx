@@ -19,7 +19,7 @@ const TripDetails: React.FC<TripDetailsProps> = ({ setTripId }) => {
   const handleSubmit = async (e: { preventDefault: () => void }) => {
     e.preventDefault();
 
-    const response = await fetch("http://127.0.0.1:8000/trips/", {
+    const response = await fetch(`${import.meta.env.VITE_APP_URL}/trips/`, {
       method: "POST",
       headers: {
         "Content-Type": "application/json",

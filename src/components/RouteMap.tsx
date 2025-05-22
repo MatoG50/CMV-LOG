@@ -98,7 +98,9 @@ const RouteMap = ({ tripId }: { tripId: number | null }) => {
   useEffect(() => {
     const fetchRoute = async () => {
       try {
-        const res = await fetch(`http://127.0.0.1:8000/trips/${tripId}/route`);
+        const res = await fetch(
+          `${import.meta.env.VITE_APP_URL}/trips/${tripId}/route`
+        );
         const data: RouteData = await res.json();
         console.log("Route data:", data);
 
