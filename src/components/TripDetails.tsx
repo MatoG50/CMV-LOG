@@ -8,6 +8,7 @@ const TripDetails: React.FC<TripDetailsProps> = ({ setTripId }) => {
   const [pickupLocation, setPickupLocation] = useState("");
   const [dropoffLocation, setDropoffLocation] = useState("");
   const [currentCycle, setCurrentCycle] = useState("");
+  const [isLoading, setIsLoading] = useState(false);
 
   const data = {
     current_location: currentLocation,
@@ -18,24 +19,31 @@ const TripDetails: React.FC<TripDetailsProps> = ({ setTripId }) => {
 
   const handleSubmit = async (e: { preventDefault: () => void }) => {
     e.preventDefault();
+    setIsLoading(true);
 
-    const response = await fetch(`${import.meta.env.VITE_APP_URL}/trips/`, {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify(data),
-    });
-    console.log("API response:", response);
+    try {
+      const response = await fetch(`${import.meta.env.VITE_APP_URL}/trips/`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify(data),
+      });
+      console.log("API response:", response);
 
-    if (response.ok) {
-      const result = await response.json();
-      console.log("Full API response:", result);
-      const newTripId = result.trip.id;
-      setTripId(newTripId);
-      console.log("Trip created successfully:", result);
-    } else {
-      console.error("Failed to create trip");
+      if (response.ok) {
+        const result = await response.json();
+        console.log("Full API response:", result);
+        const newTripId = result.trip.id;
+        setTripId(newTripId);
+        console.log("Trip created successfully:", result);
+      } else {
+        console.error("Failed to create trip");
+      }
+    } catch (error) {
+      console.error("Error creating trip:", error);
+    } finally {
+      setIsLoading(false);
     }
 
     setCurrentLocation("");
@@ -101,10 +109,34 @@ const TripDetails: React.FC<TripDetailsProps> = ({ setTripId }) => {
           </div>
 
           <button
-            className="btn w-full bg-darkgrey mb-[3%] text-white border-none text-[17px] font-body bg-green-600 rounded h-[35px] mt-3 cursor-pointer hover:bg-green-700 focus:outline-none"
+            className="btn w-full bg-darkgrey mb-[3%] text-white border-none text-[17px] font-body bg-green-600 rounded h-[35px] mt-3 cursor-pointer hover:bg-green-700 focus:outline-none flex items-center justify-center"
             type="submit"
+            disabled={isLoading}
           >
-            Submit Trip
+            {isLoading ? (
+              <svg
+                className="animate-spin -ml-1 mr-3 h-5 w-5 text-white"
+                xmlns="http://www.w3.org/2000/svg"
+                fill="none"
+                viewBox="0 0 24 24"
+              >
+                <circle
+                  className="opacity-25"
+                  cx="12"
+                  cy="12"
+                  r="10"
+                  stroke="currentColor"
+                  strokeWidth="4"
+                ></circle>
+                <path
+                  className="opacity-75"
+                  fill="currentColor"
+                  d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
+                ></path>
+              </svg>
+            ) : (
+              "Submit Trip"
+            )}
           </button>
         </form>
       </div>
